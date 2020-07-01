@@ -33,7 +33,7 @@ export const en = {
     'page.body.trade.header.newOrder.content.orderType': 'Order Type',
     'page.body.trade.header.newOrder.content.orderType.limit': 'Limit',
     'page.body.trade.header.newOrder.content.orderType.market': 'Market',
-    'page.body.trade.header.newOrder.content.orderType.stopLimit': 'Stop Limit',
+    'page.body.trade.header.newOrder.content.orderType.stopLimit': 'Stop-Limit',
     'page.body.trade.header.newOrder.content.orderType.oco': 'OCO',
     'page.body.trade.header.newOrder.content.price': 'Price',
     'page.body.trade.header.newOrder.content.amount': 'Amount',
