@@ -171,8 +171,8 @@ class Order extends React.PureComponent<OrderComponentProps, State> {
                             panels={[
                                 {content:(<div></div>), label: String(orderTypes[0])},
                                 {content:(<div></div>), label: String(orderTypes[1])},
-                                {content:(<div></div>), label: String(orderTypes[2])},
-                                {content:(<div></div>), label: String(orderTypes[3])}
+                                {content:(<div></div>), label: String(orderTypes[2]), disabled: true},
+                                {content:(<div></div>), label: String(orderTypes[3]), disabled: true}
                             ]}
                             onTabChange={this.handleChangeTabOrderType}
                             currentTabIndex={this.state.indexOrderType}
@@ -196,8 +196,8 @@ class Order extends React.PureComponent<OrderComponentProps, State> {
                         panels={[
                             {content:(<div></div>), label: String(orderTypes[0])},
                             {content:(<div></div>), label: String(orderTypes[1])},
-                            {content:(<div></div>), label: String(orderTypes[2])},
-                            {content:(<div></div>), label: String(orderTypes[3])}
+                            {content:(<div></div>), label: String(orderTypes[2]), disabled: true},
+                            {content:(<div></div>), label: String(orderTypes[3]), disabled: true}
                         ]}
                         onTabChange={this.handleChangeTabOrderType}
                         currentTabIndex={this.state.indexOrderType}
