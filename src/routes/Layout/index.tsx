@@ -38,7 +38,8 @@ import {
     VerificationScreen,
     WalletsScreen,
     legalScreen,
-    allMarketsScreen
+    allMarketsScreen,
+    InstantexScreen
 } from '../../screens';
 import { ExpiredSessionModal } from '../../components';
 
@@ -181,6 +182,7 @@ class LayoutComponent extends React.Component<LayoutProps, LayoutState> {
                     <Route exact={true} path="/" component={LandingScreen} />
                     <Route exact={true} path="/legal" component={legalScreen} />
                     <Route exact={true} path="/allmarkets" component={allMarketsScreen} />
+                    <Route exact={true} path="/instantex" component={InstantexScreen} />
                     <PrivateRoute loading={userLoading} isLogged={isLoggedIn} path="/orders" component={OrdersTabScreen} />
                     <PrivateRoute loading={userLoading} isLogged={isLoggedIn} path="/history" component={HistoryScreen} />
                     <PrivateRoute loading={userLoading} isLogged={isLoggedIn} path="/confirm" component={ConfirmScreen} />

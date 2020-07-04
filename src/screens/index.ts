@@ -15,3 +15,4 @@ export * from './VerificationScreen';
 export * from './WalletsScreen';
 export * from './legalScreen';
 export * from './allMarketsScreen';
+export * from './InstantexScreen';
