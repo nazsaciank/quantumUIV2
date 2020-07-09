@@ -26,6 +26,7 @@ export const ru: LangType = {
     'page.body.trade.header.newOrder': 'Создание ордера',
     'page.body.trade.header.newOrder.content.tabs.buy': 'Купить',
     'page.body.trade.header.newOrder.content.tabs.sell': 'Продать',
+    'page.body.trade.header.newOrder.content.tabs.exchage': 'обменять сейчас',
     'page.body.trade.header.newOrder.content.tabs.SignInOrSignUp': 'Войти или зарегистрироваться',
     'page.body.trade.header.newOrder.content.orderType': 'Тип ордера',
     'page.body.trade.header.newOrder.content.orderType.limit': 'Лимит',

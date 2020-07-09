@@ -296,13 +296,13 @@ class Order extends React.PureComponent<OrderComponentProps, State> {
             {
                 content: (
                     <OrderForm
-                        proposals={bids}
-                        type="sell"
-                        from={from}
-                        to={to}
+                        proposals={bids}//
+                        type="sell"//
+                        from={from}//
+                        to={to}//
                         orderSelected={orderSelected}
-                        available={availableBase}
-                        priceMarket={priceMarketSell}
+                        available={availableBase}//
+                        priceMarket={priceMarketSell}//
                         priceLimit={priceLimit}
                         onSubmit={this.props.onSubmit}
                         orderTypes={orderTypes ? orderTypes : defaultOrderTypes}

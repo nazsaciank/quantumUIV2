@@ -12,7 +12,7 @@ export interface OrderInputProps {
      * Code of cryptocurrency
      * @default empty
      */
-    currency: string;
+    currency: string | React.ReactNode;
     /**
      * Checking if input focused
      */
@@ -74,7 +74,7 @@ export const OrderInput: React.FunctionComponent<OrderInputProps> = (props: Orde
                 />
             </fieldset>
             <div className={cryptoIconClass}>
-                {currency.toUpperCase()}
+                {typeof currency === "string" ? currency.toUpperCase() : currency}
             </div>
         </div>
     );

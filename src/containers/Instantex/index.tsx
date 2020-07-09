@@ -1,12 +1,9 @@
-import { Spinner } from 'react-bootstrap';
 import * as React from 'react';
-import {
-    FormattedMessage,
-    InjectedIntlProps,
-    injectIntl,
-} from 'react-intl';
+
+import { InjectedIntlProps, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
-import { Order, OrderProps, WalletItemProps } from '../../components';
+
+import { WalletItemProps } from '../../components';
 import {
     alertPush,
     RootState,
@@ -14,18 +11,21 @@ import {
     selectDepthAsks,
     selectDepthBids,
     selectUserLoggedIn,
+    selectMarkets,
     selectWallets,
     setCurrentPrice,
-    Wallet, walletsFetch,
+    Wallet,
+    walletsFetch,
 } from '../../modules';
-import { Market, selectCurrentMarket, selectMarketTickers } from '../../modules/public/markets';
-import {
-    orderExecuteFetch,
-    selectOrderExecuteLoading,
-} from '../../modules/user/orders';
+import { Market, selectCurrentMarket, selectMarketTickers, setCurrentMarket } from '../../modules/public/markets';
+import { orderExecuteFetch, selectOrderExecuteLoading } from '../../modules/user/orders';
+
+import { InstantexComponent } from '../../components/Instantex'
+import { OrderProps } from '../../components/Order'
 
 interface ReduxProps {
     currentMarket: Market | undefined;
+    markets: Market[];
     executeLoading: boolean;
     marketTickers: {
         [key: string]: {
@@ -42,18 +42,22 @@ interface StoreProps {
     orderSide: string;
     priceLimit: number | undefined;
     width: number;
+
+    from: string;
+    to: string;
+    type: 'buy' | 'sell';
 }
 
 interface DispatchProps {
+    setCurrentMarket: typeof setCurrentMarket;
     accountWallets: typeof walletsFetch;
     setCurrentPrice: typeof setCurrentPrice;
     orderExecute: typeof orderExecuteFetch;
     pushAlert: typeof alertPush;
 }
-
 type Props = ReduxProps & DispatchProps & InjectedIntlProps;
 
-class OrderInsert extends React.PureComponent<Props, StoreProps> {
+class Instantex extends React.PureComponent<Props, StoreProps>{
     constructor(props: Props) {
         super(props);
 
@@ -61,16 +65,17 @@ class OrderInsert extends React.PureComponent<Props, StoreProps> {
             orderSide: 'buy',
             priceLimit: undefined,
             width: 0,
+            
+            from: '',
+            to: '',
+            type: 'buy'
         };
 
         this.orderRef = React.createRef();
     }
-
     private getOrderTypes = [
         this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.limit' }),
-        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.market' }),
-        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.stopLimit' }),
-        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.oco' }),
+        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.market' })
     ];
 
     private orderRef;
@@ -80,6 +85,12 @@ class OrderInsert extends React.PureComponent<Props, StoreProps> {
             this.setState({
                 width: this.orderRef.current.clientWidth,
             });
+        }
+        if (this.props.currentMarket && this.state.from === '' && this.state.to === ''){
+            this.setState({
+                from: this.props.currentMarket.quote_unit,
+                to: this.props.currentMarket.base_unit
+            })
         }
     }
 
@@ -95,64 +106,91 @@ class OrderInsert extends React.PureComponent<Props, StoreProps> {
         }
     }
 
-    public render() {
-        const { executeLoading, marketTickers, currentMarket, wallets, asks, bids, userLoggedIn } = this.props;
+    render(){
+
+        const {marketTickers, currentMarket, userLoggedIn, asks, bids, wallets} = this.props;
+        const {priceLimit, type, from, to} = this.state;
         if (!currentMarket) {
             return null;
         }
-        const { priceLimit } = this.state;
-
         const walletBase = this.getWallet(currentMarket.base_unit, wallets);
         const walletQuote = this.getWallet(currentMarket.quote_unit, wallets);
 
-        const to = currentMarket.base_unit;
-        const from = currentMarket.quote_unit;
+        //const to = currentMarket.base_unit;
+        //const from = currentMarket.quote_unit;
+        
+        const listTranslate = {
+            priceText: this.translate('page.body.trade.header.newOrder.content.price'),
+            amountText: this.translate('page.body.trade.header.newOrder.content.amount'),
+            totalText: this.translate('page.body.trade.header.newOrder.content.total'),
+            availableText: this.translate('page.body.trade.header.newOrder.content.available'),
+            submitUserLogOut: this.translate('page.body.trade.header.newOrder.content.tabs.SignInOrSignUp'),
+            submitExchange: this.translate('page.body.trade.header.newOrder.content.tabs.exchage'),
+        }
 
         const currentTicker = marketTickers[currentMarket.id];
         const defaultCurrentTicker = { last: '0' };
-        const headerContent = (
-            <div className="cr-table-header__content">
-                <div className="cr-title-component"><FormattedMessage id="page.body.trade.header.newOrder" /></div>
-            </div>
-        );
-        return (
 
-            <div className={'pg-order'} ref={this.orderRef}>
-                {this.state.width > 448 ? headerContent : undefined}
-                <Order
-                    asks={asks}//
-                    bids={bids}//
-                    disabled={executeLoading}
-                    from={from}//
-                    availableBase={this.getAvailableValue(walletBase)}//
-                    availableQuote={this.getAvailableValue(walletQuote)}//
-                    onSubmit={this.handleSubmit}
-                    priceMarketBuy={Number((currentTicker || defaultCurrentTicker).last)}//
-                    priceMarketSell={Number((currentTicker || defaultCurrentTicker).last)}//
-                    priceLimit={priceLimit}//
-                    to={to}//
-                    handleSendType={this.getOrderType}
+        return (
+            <div className="cr-instantex-container">
+                <InstantexComponent
+                    currencyFrom={this.currencyBySelected()}
+                    currencyTo={this.currencyAll()}
+                    type={type}
+                    asks={asks}
+                    bids={bids}
+                    availableBase={this.getAvailableValue(walletBase)}
+                    availableQuote={this.getAvailableValue(walletQuote)}
+                    priceMarketBuy={Number((currentTicker || defaultCurrentTicker).last)}
+                    priceMarketSell={Number((currentTicker || defaultCurrentTicker).last)}
+                    priceLimit={priceLimit}
+                    from={from}
+                    to={to}
                     orderTypes={this.getOrderTypes}
                     currentMarketAskPrecision={currentMarket.amount_precision}
                     currentMarketBidPrecision={currentMarket.price_precision}
-                    amountText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.amount' })}
-                    availableText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.available' })}
-                    orderTypeText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType' })}
-                    priceText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.price' })}
-                    totalText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.total' })}
-                    labelFirst={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.tabs.buy' })}
-                    labelSecond={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.tabs.sell' })}
-                    submitBuyButtonText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.tabs.buy' })}
-                    submitSellButtonText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.tabs.sell' })}
-                    submitUserLogginText={this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.tabs.SignInOrSignUp'})}
-                    width={this.state.width}
-                    listenInputPrice={this.listenInputPrice}
-
+                    translate={listTranslate}
                     userLoggedIn={userLoggedIn}
+                    onSubmit={this.handleSubmit}
+                    handleChangeFrom={this.handleChangeFrom}
+                    handleChangeTo={this.handleChangeTo}
                 />
-                {executeLoading && <div className="pg-order--loading"><Spinner animation="border" variant="primary" /></div>}
             </div>
-        );
+        )
+    }
+    private translate = (id) => {
+        return this.props.intl.formatMessage({id: id})
+    }
+    private getAvailableValue(wallet: Wallet | undefined) {
+        return wallet && wallet.balance ? Number(wallet.balance) : 0;
+    }
+    private getWallet(currency: string, wallets: WalletItemProps[]) {
+        const currencyLower = currency.toLowerCase();
+        return wallets.find(w => w.currency === currencyLower) as Wallet;
+    }
+
+    private currencyBySelected() {
+        const { markets } = this.props;
+        const { to } = this.state;
+
+        const from = markets.map(obj => {
+            if(obj['base_unit'] === to){
+                return obj['quote_unit'].toUpperCase();
+            }else if(obj['quote_unit'] === to){
+                return obj['base_unit'].toUpperCase();
+            }
+        }).filter((obj, i, self) => self.indexOf(obj) === i && obj !== undefined);
+
+        return from;
+    }
+    private currencyAll() {
+        const { markets } = this.props;
+
+        const from = markets.map(obj => obj['quote_unit'].toUpperCase());
+        const to = markets.map(obj => obj['base_unit'].toUpperCase());
+
+        return from.concat(to).filter((obj, i, self) => self.indexOf(obj) === i);
+        
     }
 
     private handleSubmit = (value: OrderProps) => {
@@ -239,26 +277,51 @@ class OrderInsert extends React.PureComponent<Props, StoreProps> {
         }
     };
 
-    private getWallet(currency: string, wallets: WalletItemProps[]) {
-        const currencyLower = currency.toLowerCase();
-        return wallets.find(w => w.currency === currencyLower) as Wallet;
-    }
+    private handleChangeTo = (to, index) => {
+        const { markets } = this.props;
+        const { from } = this.state;
+        to = to.toLowerCase();
 
-    private getOrderType = (index: number, label: string) => {
-        this.setState({
-            orderSide: label.toLowerCase(),
-        });
-    }
+        
+        const key = `${to}${from}`;
+        const _key = `${from}${to}`;
 
-    private getAvailableValue(wallet: Wallet | undefined) {
-        return wallet && wallet.balance ? Number(wallet.balance) : 0;
-    }
+        let marketToSet = markets.find(obj => obj.id === key || obj.id === _key  || obj.base_unit === to || obj.quote_unit === to);
 
-    private listenInputPrice = () => {
-        this.setState({
-            priceLimit: undefined,
-        });
-        this.props.setCurrentPrice();
+        if(marketToSet){
+            this.props.setCurrentMarket(marketToSet)
+            this.setState({
+                type: marketToSet.base_unit === to ? 'buy' : 'sell',
+                from: marketToSet.base_unit === to ? marketToSet.quote_unit : marketToSet.base_unit,
+                to: marketToSet.base_unit === to ? marketToSet.base_unit : marketToSet.quote_unit,
+            });
+                
+        }
+        
+    }
+    private handleChangeFrom = (from, index) => {
+        const { markets, currentMarket } = this.props;
+        const { to } = this.state;
+
+        from = from.toLowerCase();
+        
+        const key = `${to}${from}`; 
+        const _key = `${from}${to}`;
+
+        const marketToSet = markets.find(obj => obj.id === key || obj.id === _key);
+
+        console.log(marketToSet)
+
+        if(marketToSet){
+            if (!currentMarket || currentMarket.id !== marketToSet.id) {
+                this.props.setCurrentMarket(marketToSet)
+                this.setState({
+                    type: marketToSet.base_unit === from ? 'sell' : 'buy',
+                    from: from,
+                    to: to,
+                })
+            }
+        }
     }
 }
 
@@ -266,6 +329,7 @@ const mapStateToProps = (state: RootState) => ({
     bids: selectDepthBids(state),
     asks: selectDepthAsks(state),
     currentMarket: selectCurrentMarket(state),
+    markets: selectMarkets(state),
     executeLoading: selectOrderExecuteLoading(state),
     marketTickers: selectMarketTickers(state),
     wallets: selectWallets(state),
@@ -274,15 +338,12 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+    setCurrentMarket: (market: Market) => dispatch(setCurrentMarket(market)),
     accountWallets: () => dispatch(walletsFetch()),
     orderExecute: payload => dispatch(orderExecuteFetch(payload)),
     pushAlert: payload => dispatch(alertPush(payload)),
     setCurrentPrice: payload => dispatch(setCurrentPrice(payload)),
 });
+const InstantexContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps)(Instantex as any)) as any;
 
-// tslint:disable-next-line no-any
-const OrderComponent = injectIntl(connect(mapStateToProps, mapDispatchToProps)(OrderInsert as any)) as any;
-
-export {
-    OrderComponent,
-};
+export {InstantexContainer}

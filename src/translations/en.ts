@@ -29,6 +29,7 @@ export const en = {
     'page.body.trade.header.newOrder': 'Order Form',
     'page.body.trade.header.newOrder.content.tabs.buy': 'Buy',
     'page.body.trade.header.newOrder.content.tabs.sell': 'Sell',
+    'page.body.trade.header.newOrder.content.tabs.exchage': 'Exchage Now',
     'page.body.trade.header.newOrder.content.tabs.SignInOrSignUp': 'Sign In or Sign Up',
     'page.body.trade.header.newOrder.content.orderType': 'Order Type',
     'page.body.trade.header.newOrder.content.orderType.limit': 'Limit',
