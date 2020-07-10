@@ -74,8 +74,8 @@ class Instantex extends React.PureComponent<Props, StoreProps>{
         this.orderRef = React.createRef();
     }
     private getOrderTypes = [
-        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.limit' }),
-        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.orderType.market' })
+        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.instantex.market-price' }),
+        this.props.intl.formatMessage({ id: 'page.body.trade.header.newOrder.content.instantex.fixed-rate' })
     ];
 
     private orderRef;
@@ -158,6 +158,7 @@ class Instantex extends React.PureComponent<Props, StoreProps>{
             </div>
         )
     }
+
     private translate = (id) => {
         return this.props.intl.formatMessage({id: id})
     }
@@ -174,11 +175,13 @@ class Instantex extends React.PureComponent<Props, StoreProps>{
         const { to } = this.state;
 
         const from = markets.map(obj => {
+            let val;
             if(obj['base_unit'] === to){
-                return obj['quote_unit'].toUpperCase();
+                val = obj['quote_unit'].toUpperCase();
             }else if(obj['quote_unit'] === to){
-                return obj['base_unit'].toUpperCase();
+                val = obj['base_unit'].toUpperCase();
             }
+            return val;
         }).filter((obj, i, self) => self.indexOf(obj) === i && obj !== undefined);
 
         return from;

@@ -114,7 +114,7 @@ class InstantexComponent extends React.Component<InstantexProps, InstantexStatus
         super(props);
 
         this.state = {
-            index: 1,
+            index: 0,
             orderType: 'Market',
 
             indexDropdownFrom: 0,
@@ -301,7 +301,7 @@ class InstantexComponent extends React.Component<InstantexProps, InstantexStatus
     private handleChangeTabs = (index: number, label?: string) =>{
         this.setState({
             index: index,
-            orderType: index === 1 ? 'Market' : 'Limit'
+            orderType: index === 0 ? 'Market' : 'Limit'
         })
     }
 
